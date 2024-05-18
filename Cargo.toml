@@ -7,4 +7,9 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.85"
+axum = "0.7.5"
 thiserror = "1.0.61"
+tokio = { version = "1.37.0", features = ["full"] }
+tracing = "0.1"
+tracing-appender = "0.2.3"
+tracing-subscriber = "0.3"
