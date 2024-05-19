@@ -15,3 +15,10 @@ cargo add opentelemetry_sdk --features rt-tokio
 
 cargo add tracing-opentelemetry
 ```
+
+## Macro
+
+```sh
+cargo add derive_more
+cargo add derive_builder
+```
