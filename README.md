@@ -22,3 +22,11 @@ cargo add tracing-opentelemetry
 cargo add derive_more
 cargo add derive_builder
 ```
+
+## Serde
+
+```sh
+cargo add chrono --features serde
+```
+
+![serde example](serde_example.png)

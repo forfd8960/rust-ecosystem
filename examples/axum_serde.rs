@@ -6,8 +6,9 @@ use axum::{
     Json, Router,
 };
 
-use chrono::Utc;
-use serde::{Deserialize, Serialize};
+use chrono::{DateTime, Utc};
+use serde::ser::{Serialize, SerializeStruct, Serializer};
+use serde::Deserialize;
 use tokio::net::TcpListener;
 use tracing::instrument;
 use tracing::{info, level_filters::LevelFilter};
@@ -18,18 +19,32 @@ use tracing_subscriber::{
     Layer as _,
 };
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+#[derive(Debug, Deserialize, PartialEq, Clone)]
 struct News {
     title: String,
     author: String,
     content: String,
-    pub_date: i64,
+    pub_date: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 struct NewsUpdate {
     content: Option<String>,
-    pub_date: Option<i64>,
+    pub_date: Option<DateTime<Utc>>,
+}
+
+impl Serialize for News {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut data = serializer.serialize_struct("News", 4)?;
+        data.serialize_field("title", &self.title)?;
+        data.serialize_field("author", &self.author)?;
+        data.serialize_field("content", &self.content)?;
+        data.serialize_field("pub_date", &self.pub_date)?;
+        data.end()
+    }
 }
 
 #[tokio::main]
@@ -46,7 +61,7 @@ async fn main() -> anyhow::Result<()> {
         title: "why learn rust".to_string(),
         author: "someone".to_string(),
         content: "rust is awesome".to_string(),
-        pub_date: Utc::now().timestamp(),
+        pub_date: Utc::now(),
     };
 
     let addr = "0.0.0.0:8080";

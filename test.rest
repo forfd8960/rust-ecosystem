@@ -11,5 +11,5 @@ PATCH http://localhost:8080
 Content-Type: application/json
 
 {
-    "content": "rust is elegant and awesome"
+    "content": "rust is elegant and awesome yeah"
 }
