@@ -1,9 +1,11 @@
-use std::sync::Arc;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
-use axum::routing::get;
-use axum::routing::patch;
-use axum::Router;
+use axum::{
+    extract::State,
+    routing::{get, patch},
+    Json, Router,
+};
+
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use tokio::net::TcpListener;
@@ -16,12 +18,18 @@ use tracing_subscriber::{
     Layer as _,
 };
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 struct News {
     title: String,
     author: String,
     content: String,
     pub_date: i64,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+struct NewsUpdate {
+    content: Option<String>,
+    pub_date: Option<i64>,
 }
 
 #[tokio::main]
@@ -35,18 +43,17 @@ async fn main() -> anyhow::Result<()> {
     tracing_subscriber::registry().with(console).init();
 
     let news = News {
-        title: "".to_string(),
-        author: "".to_string(),
-        content: "".to_string(),
+        title: "why learn rust".to_string(),
+        author: "someone".to_string(),
+        content: "rust is awesome".to_string(),
         pub_date: Utc::now().timestamp(),
     };
 
-    let atomic_news = Arc::new(Mutex::new(news));
-
-    let addr = "0.0.0.0:6379";
+    let addr = "0.0.0.0:8080";
     let listner = TcpListener::bind(addr).await?;
     info!("listen on: {}", addr);
 
+    let atomic_news = Arc::new(Mutex::new(news));
     let app = Router::new()
         .route("/", get(get_news))
         .route("/", patch(update_news))
@@ -57,7 +64,22 @@ async fn main() -> anyhow::Result<()> {
 }
 
 #[instrument]
-async fn get_news() {}
+async fn get_news(State(news): State<Arc<Mutex<News>>>) -> Json<News> {
+    (*news.lock().unwrap()).clone().into()
+}
 
 #[instrument]
-async fn update_news() {}
+async fn update_news(
+    State(news): State<Arc<Mutex<News>>>,
+    Json(news_update): Json<NewsUpdate>,
+) -> Json<News> {
+    let mut news = news.lock().unwrap();
+    if let Some(content) = news_update.content {
+        news.content = content;
+    }
+    if let Some(pub_date) = news_update.pub_date {
+        news.pub_date = pub_date;
+    }
+
+    (*news).clone().into()
+}

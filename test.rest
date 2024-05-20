@@ -1,3 +1,15 @@
 ### index handler
 
 GET http://localhost:8080
+
+### get news
+GET http://localhost:8080
+
+
+### update news
+PATCH http://localhost:8080
+Content-Type: application/json
+
+{
+    "content": "rust is elegant and awesome"
+}
