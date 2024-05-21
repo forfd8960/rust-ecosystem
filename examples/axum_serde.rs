@@ -7,8 +7,7 @@ use axum::{
 };
 
 use chrono::{DateTime, Utc};
-use serde::ser::{Serialize, SerializeStruct, Serializer};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use tokio::net::TcpListener;
 use tracing::instrument;
 use tracing::{info, level_filters::LevelFilter};
@@ -19,7 +18,7 @@ use tracing_subscriber::{
     Layer as _,
 };
 
-#[derive(Debug, Deserialize, PartialEq, Clone)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 struct News {
     title: String,
     author: String,
@@ -31,20 +30,6 @@ struct News {
 struct NewsUpdate {
     content: Option<String>,
     pub_date: Option<DateTime<Utc>>,
-}
-
-impl Serialize for News {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut data = serializer.serialize_struct("News", 4)?;
-        data.serialize_field("title", &self.title)?;
-        data.serialize_field("author", &self.author)?;
-        data.serialize_field("content", &self.content)?;
-        data.serialize_field("pub_date", &self.pub_date)?;
-        data.end()
-    }
 }
 
 #[tokio::main]
