@@ -30,3 +30,12 @@ cargo add chrono --features serde
 ```
 
 ![serde example](serde_example.png)
+
+## chat server
+
+```sh
+cargo add dashmap
+cargo add tokio-stream
+cargo add tokio-util --features codec
+cargo add futures
+```
