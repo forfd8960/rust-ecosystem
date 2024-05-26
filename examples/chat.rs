@@ -32,8 +32,10 @@ struct Peer {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let layer = Layer::new().with_filter(LevelFilter::INFO);
-    tracing_subscriber::registry().with(layer).init();
+    console_subscriber::init();
+
+    // let layer = Layer::new().with_filter(LevelFilter::INFO);
+    // tracing_subscriber::registry().with(layer).init();
 
     let addr = "0.0.0.0:8080";
     info!("listen on: {}", addr);
